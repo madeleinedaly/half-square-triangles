@@ -1,0 +1,16 @@
+{
+  "name": "half-square-triangles",
+  "version": "1.0.0",
+  "description": "Half-square triangles generator",
+  "author": "Madeleine Daly",
+  "main": "index.js",
+  "keywords": [
+    "half-square-triangles",
+    "quilting",
+    "imagemagick"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "meow": "^5.0.0"
+  }
+}
