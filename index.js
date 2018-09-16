@@ -13,7 +13,6 @@ const defaults = {
 };
 
 const options = {
-  description: require('./package.json').description,
   help: `
 Usage:
   ${process.argv[1]} <file1> <file2> [-o <outfile> -s <size>]
