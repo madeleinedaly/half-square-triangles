@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 'use strict';
+const execa = require('execa');
 const meow = require('meow');
 const ora = require('ora');
 const path = require('path');
 const fs = require('fs');
-const {execFileAsync, id, mktempdir} = require('./utils');
+const {
+  getid,
+  mktempdir
+} = require('./utils');
 
 const defaults = {
   output: 'out.png',
@@ -40,10 +44,10 @@ Options:
   const spinner = ora();
   const files = {
     mask: `mask-${size}.png`,
-    crop1: `crop-${id()}.png`,
-    crop2: `crop-${id()}.png`,
-    triangle1: `triangle-${id()}.png`,
-    triangle2: `triangle-${id()}.png`
+    crop1: `crop-${getid()}.png`,
+    crop2: `crop-${getid()}.png`,
+    triangle1: `triangle-${getid()}.png`,
+    triangle2: `triangle-${getid()}.png`
   };
 
   for (const [key, value] of Object.entries(files)) {
@@ -59,7 +63,7 @@ Options:
   } else {
     spinner.start('Generating mask');
 
-    await execFileAsync('magick', [
+    await execa('magick', [
       '-size', `${size}x${size}`,
       'xc:black',
       '-fill', 'white',
@@ -71,14 +75,14 @@ Options:
   spinner.succeed().start('Cropping images');
 
   await Promise.all([
-    execFileAsync('magick', [cli.input[0], '-crop', `${size}x${size}+0+0`, '+repage', files.crop1]),
-    execFileAsync('magick', [cli.input[1], '-crop', `${size}x${size}+0+0`, '+repage', files.crop2])
+    execa('magick', [cli.input[0], '-crop', `${size}x${size}+0+0`, '+repage', files.crop1]),
+    execa('magick', [cli.input[1], '-crop', `${size}x${size}+0+0`, '+repage', files.crop2])
   ]);
 
   spinner.succeed().start('Masking cropped images');
 
   await Promise.all([
-    execFileAsync('magick', [
+    execa('magick', [
       files.crop1,
       files.mask,
       '-alpha', 'off',
@@ -86,7 +90,7 @@ Options:
       '-composite', files.triangle1
     ]),
 
-    execFileAsync('magick', [
+    execa('magick', [
       '-respect-parenthesis',
       files.crop2,
       '\(', files.mask, '-negate', '\)',
@@ -98,7 +102,7 @@ Options:
 
   spinner.succeed().start('Compositing masked images');
 
-  await execFileAsync('magick', [
+  await execa('magick', [
     files.triangle1,
     files.triangle2,
     '-compose', 'over',

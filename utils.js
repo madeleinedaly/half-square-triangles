@@ -1,13 +1,9 @@
 'use strict';
 const tempy = require('tempy');
-const fs = require('fs');
 const path = require('path');
-const util = require('util');
-const {execFile} = require('child_process');
+const fs = require('fs');
 
-const execFileAsync = util.promisify(execFile);
-
-const id = () => Math.random().toString(36).slice(2);
+const getid = () => Math.random().toString(36).slice(2);
 
 const mktempdir = debug => {
   let dir;
@@ -21,7 +17,6 @@ const mktempdir = debug => {
 };
 
 module.exports = {
-  id,
-  execFileAsync,
+  getid,
   mktempdir
 };
