@@ -43,7 +43,10 @@ Options:
   if (cli.input.length < 1) cli.showHelp(2);
 
   const modes = {
+    // use transparent buffer image when only one input is specified
     buffer: cli.input.length === 1,
+
+    // persist temp files locally, etc.
     debug: cli.flags.debug
   };
 
@@ -59,6 +62,7 @@ Options:
     triangle2: `triangle-${getid()}.png`
   };
 
+  // scope temp files to temp dir
   for (const [key, value] of Object.entries(files)) {
     files[key] = path.resolve(tempdir, value);
   }
@@ -67,6 +71,7 @@ Options:
     spinner.warn(' Debug enabled');
   }
 
+  // check if there's a mask that can be reused
   if (fs.existsSync(files.mask)) {
     spinner.start(' Found mask');
   } else {
@@ -81,6 +86,7 @@ Options:
     ]);
   }
 
+  // if buffer mode is enabled, check for resuable transparent buffer
   if (modes.buffer) {
     if (fs.existsSync(files.buffer)) {
       spinner
@@ -102,6 +108,7 @@ Options:
     .succeed()
     .start(' Cropping');
 
+  // crop input image(s)
   await Promise.all([
     execa('magick', [
       cli.input[0],
@@ -120,6 +127,7 @@ Options:
     .succeed()
     .start(' Masking');
 
+  // mask cropped image(s)
   await Promise.all([
     execa('magick', [
       files.crop1,
@@ -143,6 +151,7 @@ Options:
     .succeed()
     .start(' Compositing');
 
+  // composite two masked images or one masked image + transparent buffer
   await execa('magick', [
     files.triangle1,
     modes.buffer ? files.buffer : files.triangle2,
