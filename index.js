@@ -36,9 +36,9 @@ Options:
   if (cli.flags.h) cli.showHelp(0);
   if (cli.input.length !== 2) cli.showHelp(2);
 
-  const [input1, input2] = cli.input;
+  const tempdir = mktempdir(cli.flags.debug);
   const {size} = cli.flags;
-
+  const spinner = ora();
   const files = {
     mask: `mask-${size}.png`,
     crop1: `crop-${id()}.png`,
@@ -47,13 +47,9 @@ Options:
     triangle2: `triangle-${id()}.png`
   };
 
-  const tempdir = mktempdir(cli.flags.debug);
-
   for (const [key, value] of Object.entries(files)) {
     files[key] = path.resolve(tempdir, value);
   }
-
-  const spinner = ora();
 
   if (cli.flags.debug) {
     spinner.warn('Debug mode enabled');
@@ -73,18 +69,14 @@ Options:
     ]);
   }
 
-  spinner
-    .succeed()
-    .start('Cropping images');
+  spinner.succeed().start('Cropping images');
 
   await Promise.all([
-    execFileAsync('magick', [input1, '-crop', `${size}x${size}+0+0`, '+repage', files.crop1]),
-    execFileAsync('magick', [input2, '-crop', `${size}x${size}+0+0`, '+repage', files.crop2])
+    execFileAsync('magick', [cli.input[0], '-crop', `${size}x${size}+0+0`, '+repage', files.crop1]),
+    execFileAsync('magick', [cli.input[1], '-crop', `${size}x${size}+0+0`, '+repage', files.crop2])
   ]);
 
-  spinner
-    .succeed()
-    .start('Masking cropped images');
+  spinner.succeed().start('Masking cropped images');
 
   await Promise.all([
     execFileAsync('magick', [
@@ -105,9 +97,7 @@ Options:
     ])
   ]);
 
-  spinner
-    .succeed()
-    .start('Compositing masked images');
+  spinner.succeed().start('Compositing masked images');
 
   await execFileAsync('magick', [
     files.triangle1,
@@ -116,7 +106,5 @@ Options:
     '-composite', cli.flags.output
   ]);
 
-  spinner
-    .succeed()
-    .succeed('Done');
+  spinner.succeed().succeed('Done');
 })(meow(options));
