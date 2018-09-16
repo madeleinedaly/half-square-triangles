@@ -19,7 +19,7 @@ const defaults = {
 const options = {
   help: `
 Usage:
-  ${process.argv[1]} <file1> <file2> [-o <outfile> -s <size>]
+  ${process.argv[1]} <file1> [<file2> -o <outfile> -s <size>]
 Options:
   -o --output <outfile>  Set output file name. [default: ${defaults.output}]
   -s --size <size>       Set square length. [default: ${defaults.size}]
@@ -37,9 +37,12 @@ Options:
 
 (async cli => {
   if (cli.flags.h) cli.showHelp(0);
-  if (cli.input.length !== 2) cli.showHelp(2);
+  if (cli.input.length < 1) cli.showHelp(2);
 
-  const tempdir = mktempdir(cli.flags.debug);
+  const bufferMode = cli.input.length === 1;
+  const debugMode = cli.flags.debug;
+
+  const tempdir = mktempdir(debugMode);
   const {size} = cli.flags;
   const spinner = ora();
   const files = {
@@ -49,6 +52,11 @@ Options:
     triangle1: `triangle-${getid()}.png`,
     triangle2: `triangle-${getid()}.png`
   };
+
+  if (bufferMode) {
+    delete files.crop2;
+    files.buffer = `buffer-${size}.png`;
+  }
 
   for (const [key, value] of Object.entries(files)) {
     files[key] = path.resolve(tempdir, value);
@@ -72,18 +80,44 @@ Options:
     ]);
   }
 
+  if (bufferMode) {
+    if (fs.existsSync(files.buffer)) {
+      spinner
+        .succeed()
+        .start(' Found buffer');
+    } else {
+      spinner
+        .succeed()
+        .start(' Generating buffer');
+
+      execa('magick', [
+        '-size', `${size}x${size}`,
+        'xc:none', files.buffer
+      ]);
+    }
+  }
+
   spinner
     .succeed()
-    .start(' Cropping images');
+    .start(' Cropping');
 
   await Promise.all([
-    execa('magick', [cli.input[0], '-crop', `${size}x${size}+0+0`, '+repage', files.crop1]),
-    execa('magick', [cli.input[1], '-crop', `${size}x${size}+0+0`, '+repage', files.crop2])
+    execa('magick', [
+      cli.input[0],
+      '-crop', `${size}x${size}+0+0`,
+      '+repage', files.crop1
+    ]),
+
+    bufferMode ? Promise.resolve() : execa('magick', [
+      cli.input[1],
+      '-crop', `${size}x${size}+0+0`,
+      '+repage', files.crop2
+    ])
   ]);
 
   spinner
     .succeed()
-    .start(' Masking cropped images');
+    .start(' Masking');
 
   await Promise.all([
     execa('magick', [
@@ -94,7 +128,7 @@ Options:
       '-composite', files.triangle1
     ]),
 
-    execa('magick', [
+    bufferMode ? Promise.resolve() : execa('magick', [
       '-respect-parenthesis',
       files.crop2,
       '\(', files.mask, '-negate', '\)',
@@ -106,19 +140,16 @@ Options:
 
   spinner
     .succeed()
-    .start(' Compositing masked images');
+    .start(' Compositing');
 
   await execa('magick', [
     files.triangle1,
-    files.triangle2,
+    bufferMode ? files.buffer : files.triangle2,
     '-compose', 'over',
     '-composite', cli.flags.output
   ]);
 
   spinner
     .succeed()
-    .stopAndPersist({
-      symbol: '✨',
-      text: 'Done'
-    });
+    .stopAndPersist({symbol: '✨', text: 'Done'});
 })(meow(options));
