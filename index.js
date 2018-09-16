@@ -19,7 +19,10 @@ const defaults = {
 const options = {
   help: `
 Usage:
-  ${process.argv[1]} <file1> [<file2> -o <outfile> -s <size>]
+  ${path.basename(process.argv[1])} <file1> [<file2> -o <outfile> -s <size>]
+
+Passing only one input file renders one of the triangles transparent.
+
 Options:
   -o --output <outfile>  Set output file name. [default: ${defaults.output}]
   -s --size <size>       Set square length. [default: ${defaults.size}]
