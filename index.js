@@ -86,7 +86,7 @@ Options:
     ]);
   }
 
-  // if buffer mode is enabled, check for resuable transparent buffer
+  // if buffer mode is enabled, check for reusable transparent buffer
   if (modes.buffer) {
     if (fs.existsSync(files.buffer)) {
       spinner
