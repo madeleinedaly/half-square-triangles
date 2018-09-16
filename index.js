@@ -55,13 +55,13 @@ Options:
   }
 
   if (cli.flags.debug) {
-    spinner.warn('Debug mode enabled');
+    spinner.warn(' Debug mode enabled');
   }
 
   if (fs.existsSync(files.mask)) {
-    spinner.start('Found a mask');
+    spinner.start(' Found a mask');
   } else {
-    spinner.start('Generating mask');
+    spinner.start(' Generating mask');
 
     await execa('magick', [
       '-size', `${size}x${size}`,
@@ -72,14 +72,18 @@ Options:
     ]);
   }
 
-  spinner.succeed().start('Cropping images');
+  spinner
+    .succeed()
+    .start(' Cropping images');
 
   await Promise.all([
     execa('magick', [cli.input[0], '-crop', `${size}x${size}+0+0`, '+repage', files.crop1]),
     execa('magick', [cli.input[1], '-crop', `${size}x${size}+0+0`, '+repage', files.crop2])
   ]);
 
-  spinner.succeed().start('Masking cropped images');
+  spinner
+    .succeed()
+    .start(' Masking cropped images');
 
   await Promise.all([
     execa('magick', [
@@ -100,7 +104,9 @@ Options:
     ])
   ]);
 
-  spinner.succeed().start('Compositing masked images');
+  spinner
+    .succeed()
+    .start(' Compositing masked images');
 
   await execa('magick', [
     files.triangle1,
@@ -109,5 +115,10 @@ Options:
     '-composite', cli.flags.output
   ]);
 
-  spinner.succeed().succeed('Done');
+  spinner
+    .succeed()
+    .stopAndPersist({
+      symbol: '✨',
+      text: 'Done'
+    });
 })(meow(options));
