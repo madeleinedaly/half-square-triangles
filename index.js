@@ -39,35 +39,33 @@ Options:
   if (cli.flags.h) cli.showHelp(0);
   if (cli.input.length < 1) cli.showHelp(2);
 
-  const bufferMode = cli.input.length === 1;
-  const debugMode = cli.flags.debug;
+  const modes = {
+    buffer: cli.input.length === 1,
+    debug: cli.flags.debug
+  };
 
-  const tempdir = mktempdir(debugMode);
+  const tempdir = mktempdir(modes.debug);
   const {size} = cli.flags;
   const spinner = ora();
   const files = {
     mask: `mask-${size}.png`,
+    buffer: `buffer-${size}.png`,
     crop1: `crop-${getid()}.png`,
     crop2: `crop-${getid()}.png`,
     triangle1: `triangle-${getid()}.png`,
     triangle2: `triangle-${getid()}.png`
   };
 
-  if (bufferMode) {
-    delete files.crop2;
-    files.buffer = `buffer-${size}.png`;
-  }
-
   for (const [key, value] of Object.entries(files)) {
     files[key] = path.resolve(tempdir, value);
   }
 
   if (cli.flags.debug) {
-    spinner.warn(' Debug mode enabled');
+    spinner.warn(' Debug enabled');
   }
 
   if (fs.existsSync(files.mask)) {
-    spinner.start(' Found a mask');
+    spinner.start(' Found mask');
   } else {
     spinner.start(' Generating mask');
 
@@ -80,7 +78,7 @@ Options:
     ]);
   }
 
-  if (bufferMode) {
+  if (modes.buffer) {
     if (fs.existsSync(files.buffer)) {
       spinner
         .succeed()
@@ -108,7 +106,7 @@ Options:
       '+repage', files.crop1
     ]),
 
-    bufferMode ? Promise.resolve() : execa('magick', [
+    modes.buffer ? Promise.resolve() : execa('magick', [
       cli.input[1],
       '-crop', `${size}x${size}+0+0`,
       '+repage', files.crop2
@@ -128,7 +126,7 @@ Options:
       '-composite', files.triangle1
     ]),
 
-    bufferMode ? Promise.resolve() : execa('magick', [
+    modes.buffer ? Promise.resolve() : execa('magick', [
       '-respect-parenthesis',
       files.crop2,
       '\(', files.mask, '-negate', '\)',
@@ -144,7 +142,7 @@ Options:
 
   await execa('magick', [
     files.triangle1,
-    bufferMode ? files.buffer : files.triangle2,
+    modes.buffer ? files.buffer : files.triangle2,
     '-compose', 'over',
     '-composite', cli.flags.output
   ]);
