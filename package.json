@@ -1,16 +1,13 @@
 {
-  "name": "half-square-triangles",
+  "name": "image-utils",
   "version": "1.0.0",
-  "description": "Half-square triangles generator",
+  "description": "ImageMagick helpers",
   "author": "Madeleine Daly",
-  "main": "index.js",
   "bin": {
-    "half-square-triangles": "./index.js"
+    "half-square-triangles": "./bin/half-square-triangles.js",
+    "map-colors": "./bin/map-colors.js"
   },
   "keywords": [
-    "half-square-triangles",
-    "quilting",
-    "collage",
     "imagemagick"
   ],
   "license": "MIT",
