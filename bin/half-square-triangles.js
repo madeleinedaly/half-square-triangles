@@ -87,7 +87,7 @@ Options:
     ]);
   }
 
-  // if buffer mode is enabled, check for reusable transparent buffer
+  // if we're in buffer mode, check for reusable transparent buffer
   if (modes.buffer) {
     if (fs.existsSync(files.buffer)) {
       spinner
@@ -98,7 +98,7 @@ Options:
         .succeed()
         .start(' Generating buffer');
 
-      execa('magick', [
+      await execa('magick', [
         '-size', `${size}x${size}`,
         'xc:none', files.buffer
       ]);
