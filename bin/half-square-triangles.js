@@ -17,6 +17,7 @@ const defaults = {
 };
 
 const options = {
+  description: 'Generate half-square triangles',
   help: `
 Usage:
   ${path.basename(process.argv[1])} <file1> [<file2> -o <outfile> -s <size>]
