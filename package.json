@@ -1,14 +1,15 @@
 {
-  "name": "image-utils",
+  "name": "visual-utils",
   "version": "1.0.0",
-  "description": "ImageMagick helpers",
+  "description": "ImageMagick and ffmpeg helpers",
   "author": "Madeleine Daly",
   "bin": {
-    "half-square-triangles": "./bin/half-square-triangles.js",
-    "map-colors": "./bin/map-colors.js"
+    "half-square-triangles": "./bin/half-square-triangles.js"
   },
   "keywords": [
-    "imagemagick"
+    "imagemagick",
+    "ffmpeg",
+    "node.js"
   ],
   "license": "MIT",
   "dependencies": {
