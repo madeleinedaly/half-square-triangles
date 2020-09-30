@@ -13,9 +13,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "execa": "^1.0.0",
-    "meow": "^5.0.0",
-    "ora": "^3.0.0",
-    "tempy": "^0.2.1"
+    "execa": "4.0.3",
+    "meow": "7.1.1",
+    "ora": "5.1.0",
+    "tempy": "0.7.1"
   }
 }
